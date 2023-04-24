@@ -1,4 +1,4 @@
-import React, {  useLayoutEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import './App.css';
 import * as am5 from "@amcharts/amcharts5";
 
@@ -9,54 +9,62 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
 function App() {
   useLayoutEffect(() => {
-    
+
     let root = am5.Root.new("chartdiv");
     const myTheme = am5.Theme.new(root);
-    
+
     myTheme.rule("Label").setAll({
       fill: am5.color(0xFF0000),
       fontSize: "1em"
-    }); 
-   
+    });
+
 
     root.setThemes([
       am5themes_Animated.new(root),
       myTheme,
-      
+
     ]);
-    
+
 
     var container = root.container.children.push(am5.Container.new(root, {
-  width: am5.percent(100),
-  height: am5.percent(100),
-  layout: root.verticalLayout
-}));
+      width: am5.percent(100),
+      height: am5.percent(100),
+      layout: root.verticalLayout
+    }));
 
 
 
-// Create series
-var series = container.children.push(am5hierarchy.Tree.new(root, {
-  singleBranchOnly: false,
-  downDepth: 1,
-  initialDepth: 10,
-  valueField: "value",
-  categoryField: "name" ,
-  childDataField: "children"
-}));
-// series.circles.template.adapters.add("scale", function() {
-//   return 1.5;
-// });
-// series.outerCircles.template.adapters.add("scale", function() {
-//   return 1.6;
-// });
-//=======================  
-series.circles.template.setAll({
-  radius: 26
-});
-series.outerCircles.template.setAll({
-  radius: 26.1
-});
-//==========================
+    // Create series
+    var series = container.children.push(am5hierarchy.Tree.new(root, {
+      singleBranchOnly: false,
+      downDepth: 1,
+      initialDepth: 10,
+      valueField: "value",
+      categoryField: "name",
+      childDataField: "children",
+      // orientation: "horizontal"
+    }));
+    // series.circles.template.adapters.add("scale", function() {
+    //   return 1.5;
+    // });
+    // series.outerCircles.template.adapters.add("scale", function() {
+    //   return 1.6;
+    // });
+    //=======================  
+    series.circles.template.setAll({
+      radius: 60,
+      
+    });
+    series.outerCircles.template.setAll({
+      radius: 60.1
+    });
+
+// Hide circles
+// series.circles.template.set("forceHidden", true);
+// series.outerCircles.template.set("forceHidden", true);
+
+
+    //==========================
     var children1 = {
       "2023-04-18": {
         "Clearscore": {
@@ -259,51 +267,66 @@ series.outerCircles.template.setAll({
         }
       }
     }
-     // code============
-//     JSONObject object = new JSONObject ();
-// JSONArray keys = object.names ();
+    // code============
+    //     JSONObject object = new JSONObject ();
+    // JSONArray keys = object.names ();
 
-// for (int i = 0; i < keys.length (); i++) {
-   
-//    String key = keys.getString (i); // Here's your key
-//    String value = object.getString (key); // Here's your value
-   
-// }
+    // for (int i = 0; i < keys.length (); i++) {
+
+    //    String key = keys.getString (i); // Here's your key
+    //    String value = object.getString (key); // Here's your value
+
+    // }
     //===================
-    var newdata={
-      name :"Total_Applicant",
-      
-      children:[],
+    var newdata = {
+      name: "Total_Applicant",
+
+      children: [],
     }
-    Object.entries(children1).map(([key,value])=>{
-      var date={
-        name:key,
+
+    let overallTotalValue = 0;
+    Object.entries(children1).map(([key, value]) => {
+
+
+      let rootTotalValue = 0;
+      var date = {
+        name: key,
         value: key,
-        children:[],
+        children: [],
       }
-      Object.entries(value).map(([k,v])=>{
-        var newchild ={ }
-        newchild.name= k;
-        newchild.children=[];
-        Object.entries(v).map(([k1,v1])=>{
-          var newchild1={};
-          newchild1.name=k1;
-          newchild1.children=[];
-          newchild1.value=parseInt(v1);
-          newchild.children.push(newchild1);
+      Object.entries(value).map(([k, v]) => {
+        var newchild = {}
+        newchild.name = k;
+        newchild.children = [];
+        let totalValue = 0;
+        Object.entries(v).map(([k1, v1]) => {
+          var newchild1 = {};
+          newchild1.name = k1 + " : " + parseInt(v1);
+          newchild1.children = [];
+          newchild1.value = parseInt(v1);
+          if (k1 !== 'Total') {
+            newchild.children.push(newchild1);
+            
+          totalValue = totalValue + newchild1.value;
+          }
+          // newchild.children.push(newchild1);
         })
+        newchild.name = k + " : " + totalValue;
+        rootTotalValue = rootTotalValue + totalValue;
         date.children.push(newchild);
       })
+      date.name = date.name + " : " + rootTotalValue;
       newdata.children.push(date);
+      overallTotalValue = overallTotalValue + rootTotalValue;
     })
     //=====================
- 
+    newdata.name = newdata.name + " : " + overallTotalValue;
     series.data.setAll([newdata]);
     series.set("selectedDataItem", series.dataItems[0]);
-    
-    
 
-    
+
+
+
 
     series.appear(1000, 100);
     return () => {
@@ -312,8 +335,12 @@ series.outerCircles.template.setAll({
   }, []);
 
   return (
-    <div id="chartdiv" style={{ width: "100%", height: "550px" , }}></div>
-  );
+    <>
+  
+    <div id="chartdiv" style={{ width: "100%", height: "850px"}}></div>
+  
+    </>
+    );
 }
 export default App;
 
